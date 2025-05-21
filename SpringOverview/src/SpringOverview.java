@@ -45,6 +45,67 @@ thiết về tài nguyên và kích thước gói triển khia.
 
 ===== Các khai niệm cốt lõi của SPRING FRAMEWORK ====
 
+----- INVERSION OF CONTROL (IoC) Container
++) nguyên tắc thiết kế cốt lõi, thành phần trung tâm của Spring Framework
++) thay vì tự tay tạo và quản lí vòng đời (tạo, cấu hình, liên kết, huỷ) cyar các objects trong ứng dụng bạn giao phó trách nghiệm này cho một thực
+    thể bên ngoài => Spring Ioc Container.
+    nó sẽ đọc thông tin cấu hình(configuration metadata) và dựa vào đó để khởi tạo, cấu hình và lắp ráp các đối tượng
+    (Spring Beans). => inversion of Control -> giảm sự phụ thuộc giữa các thành phần trong ứng dụng
++) các loại container: 2 loại chính
+    -) BeanFactory: cơ bản nhất, cung cấp các chức năng cốt lõi cảu Ioc và DI. trong môi trường có tài nguyên hạn chế
+       sử dụng cơ chế tạo lười(lazy initialization), tức là bean chỉ được tạo khi yêu cầu lần đầu
+    -) ApplicationContext: là một interface kế thừa từ BeanFactory, cung cấp nheiefu tính năng nâng cao hơn
+        event publication, AOP, quốc tế hoá i18n, dễ dàng tích hợp các dịch vụ khác của spring
+        - thường tạo các bean singleton ngay khi container khởi động (eager initializtion).
+
+----- Dependency Injection (DI)
+- DI là một mô hình thiết kế (design pattern) cụ thể để hiện thực hoá nguyên tác IoC
+    -) cách hoạt động: thay vì một đối tượng tự tìm kiếm hoặc tạo ra các đối tượng khác mà nó cần (gọi là dependencies)
+     IoC Container sẽ chủ động inject các dependecies này vào đối tượng khi nó được tạo ra.
+     tức là các đối tượng không tự lo việc tạo dependencies của mình, mà được cung cấp từ bên ngoài (bởi Container)
+    -) Các kiểu DI phổ biến:
+        =) Constructor Injection: Dependencies được cung cấp thông qua constuctor của lớp.
+            là cách được khuyến nghị vì đảm bảo đối tượng luôn có đủ dependencies cần thiết
+            ngay khi được tạo ra và giúp tạo các đối tượng immutable
+        =) Setter Injection: dependencies được tiêm thong qua các phương thức setter của lớp. các này linh hoạt hơn,
+               cho phép thay đổi dependency sau khi đối tượng được tạo, nhưng không đảm bảo dependency luôn tồn tại.
+        =) Interface Injection: Dependencies được tiêm thông qua cài đặt một interface định nghĩa phươgn thức inject. ít sử dụng trong Spring
+
+----- Spring Beans
+    - Trong ngữ cảnh của Spring, Beans là các đối tượng jaa thông thường (POJOs) nhưng được khởi tạo, lắp ráp quản lí dòng đời bởi
+    Spring IoC Container, chính là các thành phần cấu tạo nên ứng dụng
+    - Bean Scopes(phạm vi của Bean): định nghĩa vòng đời, khả năng hiển thị của một bean trong container
+    - Các Scope phổ biến:
+            =) Singleton(Mặc đinh): chỉ có một instance duy nhất của bean được tạo ra cho mỗi IoC Container.
+                mọi yêu cầu đến bean này đều trả về cùng một instance
+            =) Prototype: mỗi khi có yêu cầu lấy Bean từ container, một instance mới sẽ được tạo ra
+                Container tạo và cấu hình bean, nhưng khong quản lí toàn bộ vòng đời của nó sau đó
+            =) Request (ưng dụng web): một thể hiện bean mới được tạo ra cho mỗi HTTP request
+            =) Session (ừng dụng web): một thể hiện bean mới được tạo ra cho mỗi HTTP sesstion
+            =) Application (ứng dụng web): một thể hiện bean duy nhất được tạo cho toàn bộ vòng đời của ServletContext
+            =) một số scope tuỳ chỉnh
+
+------ Configuration Metadata
+        Siêu dữ liệu cấu hình
+        - là cách để 'chỉ dẫn' cho Sring IoC container biết cần tạo những bean nào, thuộc lớp nào,
+            có nhưng dependecies gì, quản lí như thế nào
+        - các hình thức cấu hình:
+            =) XML- base configuration: l cách cấu hình truyền thống, sử dụng các file XML để định nghĩa
+            bean và dependencies(<bean>,<property>,<Constructor-arg>). dễ đọc với cấu trúc rõ ràng
+            nhưng có thể trở nên dài dòng
+            =) Annotation-based configuration: dử dụng các annotation trực tiếp trong mã nguồn java
+            để đánh dấu các lơớp là bean (@Component, @Service, @Repository, @Controller), đánh dấu
+            các dependencies cần tiêm(@Autowired), và cấu hình khác (@Scope, @Qualifier).
+            => cách ngắn gọn gần gũi với code hơn
+            =) Java-based configuration(JavaConfig): sử dụng các lớp java và annotation (@Configuration, @Bean)
+            để định nghĩa cấu hình cách này cung cấp sự an toàn kiểu (Type safety), khả năng tái cáu trúc tốt hơn so với XML
+            đang ngày càng phổ biến đặc biệt với Spring Boot.
+
+------ Aspect-Oriented Programming (AOP)
+        - là một mô hình lập trình bổ sung cho Lập trình hướng đối tượng(OOP), giúp giải quyết các mối quan tâm
+        xuyên suốt(Cross-cutting concerns). Đây là chức năng cần được áp dụng cho nhiều phầ khác nhau trong ứng dụng
+        nhưng không thuộc về logic nghiệp vụ cốt lõi của các phần đó (vd: logging, security, transcation, management, caching)
+        - Mục tiêu: cho phép bạn tách biệt các cross-cutting concerns này ra khỏi logic nghiệp vụ chính, giúp mã nguồn sạch sẽ, dễ bảo trì và module hoá hơn
 
      */
 }
